@@ -1,14 +1,11 @@
--- Etapa 01 - Criando as tabelas de acordo com o MER fornecido no artigo
-
--- Bandeira (nome  e url)
 create table Bandeira (
 id_bandeira int auto_increment primary key,
 nome varchar (50),
 url varchar (100)
 );
 
--- Cidade (nome,estado,,latitude,longitude)
-CREATE TABLE cidade (
+-- Cidade (nome,estado,latitude,longitude)
+CREATE TABLE Cidade (
     id_cidade INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
     estado VARCHAR(2) NOT NULL,  -- Apenas um campo para UF (sigla)
@@ -60,6 +57,8 @@ create table Pessoa (
     login VARCHAR(35),
     nome VARCHAR(35),
     endereco VARCHAR(30),
+    bairro int,
+    foreign key (bairro) references Bairro(id_bairro),
     PRIMARY KEY (login),
     FOREIGN KEY (login) REFERENCES Usuario(login)
 );
@@ -147,12 +146,12 @@ INSERT INTO Usuario (login, senha, id_tipo_usuario) VALUES
 ('leonardo', '123456', 1); --  admin
 
 -- Pessoas
-INSERT INTO Pessoa (login, nome, endereco) VALUES
-('julia', 'Júlia Rodrigues', 'Rua Descampado, 15'),
-('rafael', 'Rafael Ferreira', 'Rua das Dálias, 20'),
-('giovana', 'Giovana Budri', 'Rua Carmono, 360'),
-('bruno', 'Bruno Kimura', 'Rua Timburi, 1361'),
-('leonardo', 'Leonardo Rodrigues', 'Rua Sete Quedas, 7');
+INSERT INTO Pessoa (login, nome, endereco, bairro) VALUES
+('julia', 'Júlia Rodrigues', 'Rua Descampado, 15', 1),
+('rafael', 'Rafael Ferreira', 'Rua das Dálias, 20', 1),
+('giovana', 'Giovana Budri', 'Rua Carmono, 360', 2),
+('bruno', 'Bruno Kimura', 'Rua Timburi, 1361', 3),
+('leonardo', 'Leonardo Rodrigues', 'Rua Sete Quedas, 7', 4);
 
 
 -- Veículos
@@ -204,3 +203,28 @@ INSERT INTO Preco (id_posto_combustivel, valor, momento) VALUES
 (9, 5.05, '2025-01-27 10:49:00'),
 -- Diesel no Posto 5
 (10, 6.29, '2025-04-02 22:50:00');
+
+SELECT Bairro.nome as Bairro , c.nome as Cidade, c.estado from Bairro
+inner join Cidade as c on c.id_cidade = Bairro.id_cidade
+where c.nome = 'Maceió';
+
+SELECT ban.nome, p.razao_social, b.nome from Bandeira as ban
+inner join Posto as p on p.id_bandeira = ban.id_bandeira
+inner join Bairro as b on b.id_bairro = p.id_bairro
+where b.nome = 'Cambuí';
+
+SELECT p.razao_social, cb.nome, pr.valor from Posto as p
+inner join Posto_Combustivel as pc on pc.id_posto = p.id_posto
+inner join Preco as pr on pr.id_posto_combustivel = pc.id_posto_combustivel
+inner join Combustivel as cb on cb.id_combustivel = pc.id_combustivel
+order by p.razao_social;
+
+SELECT u.login, v.marca, v.modelo from Usuario as u
+inner join Veiculo as v on v.login_usuario = u.login
+inner join Pessoa as p on p.login = u.login
+order by u.login;
+
+SELECT p.login as Nome, p.endereco, b.nome as Bairro, c.nome as Cidade from Bairro as b
+inner join Pessoa as p on p.bairro = b.id_bairro
+inner join Cidade as c on c.id_cidade = b.id_cidade
+order by p.login, c.nome;
